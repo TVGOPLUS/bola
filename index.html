@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Live Matches</title>
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --card:#111;
+      --accent:#ff8a00;
+      --live-green:#18b243;
+      --text:#eee;
+      --muted:#bdbdbd;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:#000;
+      font-family: Arial, sans-serif;
+      color:var(--text);
+      padding:24px;
+    }
+
+    .container{max-width:880px;margin:0 auto;}
+    h1{margin:0 0 16px;font-size:20px;}
+
+    .list{display:grid;gap:18px}
+
+    .card{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      background:#111;
+      border-radius:12px;
+      padding:14px 16px;
+      border:1px solid rgba(255,140,0,0.1);
+      cursor:pointer;
+      transition:0.12s;
+    }
+    .card:hover{transform:scale(1.02)}
+
+    .left{
+      display:flex;align-items:center;gap:12px;min-width:0;
+    }
+    .team{
+      display:flex;align-items:center;gap:8px;min-width:0;
+    }
+    .logo{
+      width:42px;height:42px;border-radius:8px;overflow:hidden;background:#222;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .logo img{width:100%;height:100%;object-fit:cover}
+
+    .team-name{
+      font-weight:600;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:120px;
+    }
+
+    .score{
+      font-size:26px;
+      font-weight:700;
+      padding:0 10px;
+      color:#ff8a00;
+      letter-spacing:2px;
+    }
+
+    .status{
+      display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+      min-width:120px;
+    }
+    .badge{
+      padding:6px 12px;border-radius:20px;font-weight:700;font-size:12px;color:white;
+    }
+    .live{background:#18b243}
+    .soon{background:#ff8a00;color:#111}
+
+    .watch-btn{
+      background:var(--accent);
+      color:#fff;
+      border:none;
+      border-radius:8px;
+      padding:8px 14px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .meta{font-size:13px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Live Events — Jadwal</h1>
+    <div id="msg" class="meta">Memuat data…</div>
+    <div class="list" id="matchList"></div>
+  </div>
+
+  <script>
+    const MATCHES_JSON = 'matches.json';
+    const STREAMS_JSON = 'streams.json';
+    const IMAGES_PATH = 'images/';
+
+    const $msg = document.getElementById('msg');
+    const $list = document.getElementById('matchList');
+
+    async function loadData(){
+      try {
+        const [mRes, sRes] = await Promise.all([
+          fetch(MATCHES_JSON),
+          fetch(STREAMS_JSON)
+        ]);
+        const matches = await mRes.json();
+        const streams = await sRes.json();
+        render(matches, streams);
+      } catch(err){
+        $msg.textContent = 'Gagal memuat data.';
+      }
+    }
+
+    function render(matches, streams){
+      $msg.style.display = 'none';
+      $list.innerHTML = '';
+      matches.forEach(match => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        card.addEventListener('click', ()=>{
+          const sid = match.streamId;
+          const url = streams[sid]?.url || match.streamUrl;
+          if(url) window.open(url, '_blank');
+          else alert('Tidak ada link streaming.');
+        });
+
+        const left = document.createElement('div'); 
+        left.className = 'left';
+
+        const teamA = makeTeamBlock(match.homeTeam, match.homeLogo);
+        const score = document.createElement('div'); 
+        score.className = 'score';
+        score.textContent = "VS";
+        const teamB = makeTeamBlock(match.awayTeam, match.awayLogo);
+
+        left.appendChild(teamA);
+        left.appendChild(score);
+        left.appendChild(teamB);
+
+        const right = document.createElement('div');
+        right.className = 'status';
+
+        const badge = document.createElement('div');
+        badge.className = 'badge ' + (match.status === 'LIVE' ? 'live' : 'soon');
+        badge.textContent = match.status;
+
+        const time = document.createElement('div');
+        time.className = 'meta';
+        time.textContent = match.time || '';
+
+        const btn = document.createElement('button');
+        btn.className = 'watch-btn';
+        btn.textContent = "TONTON";
+
+        btn.addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          const sid = match.streamId;
+          const url = streams[sid]?.url || match.streamUrl;
+          if(url) window.open(url, '_blank');
+        });
+
+        right.appendChild(badge);
+        right.appendChild(time);
+        right.appendChild(btn);
+
+        card.appendChild(left);
+        card.appendChild(right);
+
+        $list.appendChild(card);
+      });
+    }
+
+    function makeTeamBlock(name, logo){
+      const wrap = document.createElement('div'); 
+      wrap.className = 'team';
+
+      const logoBox = document.createElement('div');
+      logoBox.className = 'logo';
+
+      const img = document.createElement('img');
+      img.src = IMAGES_PATH + logo;
+      logoBox.appendChild(img);
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'team-name';
+      nameEl.textContent = name;
+
+      wrap.appendChild(logoBox);
+      wrap.appendChild(nameEl);
+
+      return wrap;
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
