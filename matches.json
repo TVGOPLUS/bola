@@ -1,0 +1,50 @@
+[
+  {
+    "id": "m1",
+    "homeTeam": "Haiti",
+    "awayTeam": "Costa Rica",
+    "homeScore": 1,
+    "awayScore": 0,
+    "homeLogo": "haiti.png",
+    "awayLogo": "costarica.png",
+    "status": "LIVE",
+    "time": "45'+2\"",
+    "streamId": "s1"
+  },
+  {
+    "id": "m2",
+    "homeTeam": "Guatemala",
+    "awayTeam": "Panama",
+    "homeScore": 2,
+    "awayScore": 3,
+    "homeLogo": "guatemala.png",
+    "awayLogo": "panama.png",
+    "status": "LIVE",
+    "time": "HT",
+    "streamId": "s2"
+  },
+  {
+    "id": "m3",
+    "homeTeam": "Utah Jazz",
+    "awayTeam": "Atlanta Hawks",
+    "homeScore": 33,
+    "awayScore": 42,
+    "homeLogo": "jazz.png",
+    "awayLogo": "hawks.png",
+    "status": "LIVE",
+    "time": "Q2 03:21",
+    "streamId": "s3"
+  },
+  {
+    "id": "m4",
+    "homeTeam": "Adelaide Utd",
+    "awayTeam": "Canberra Utd",
+    "homeScore": 0,
+    "awayScore": 0,
+    "homeLogo": "adelaide.png",
+    "awayLogo": "canberra.png",
+    "status": "SEGERA",
+    "time": "19:00",
+    "streamId": "s4"
+  }
+]
