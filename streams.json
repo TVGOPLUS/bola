@@ -1,0 +1,18 @@
+{
+  "s1": {
+    "platform": "ExampleTV",
+    "url": "https://example.com/live/haiti-vs-costa"
+  },
+  "s2": {
+    "platform": "ExampleTV",
+    "url": "https://example.com/live/guatemala-vs-panama"
+  },
+  "s3": {
+    "platform": "BasketLive",
+    "url": "https://example.com/live/jazz-hawks"
+  },
+  "s4": {
+    "platform": "Upcoming",
+    "url": "https://example.com/live/adelaide-canberra"
+  }
+}
