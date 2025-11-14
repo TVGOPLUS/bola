@@ -1,208 +1,138 @@
-<!doctype html>
-<html lang="id">
+
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Live Matches</title>
-  <style>
-    :root{
-      --bg:#0b0b0b;
-      --card:#111;
-      --accent:#ff8a00;
-      --live-green:#18b243;
-      --text:#eee;
-      --muted:#bdbdbd;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      background:#000;
-      font-family: Arial, sans-serif;
-      color:var(--text);
-      padding:24px;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Football Schedule</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f2f2f2;
+        margin: 0;
+        padding: 0;
     }
 
-    .container{max-width:880px;margin:0 auto;}
-    h1{margin:0 0 16px;font-size:20px;}
-
-    .list{display:grid;gap:18px}
-
-    .card{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      background:#111;
-      border-radius:12px;
-      padding:14px 16px;
-      border:1px solid rgba(255,140,0,0.1);
-      cursor:pointer;
-      transition:0.12s;
-    }
-    .card:hover{transform:scale(1.02)}
-
-    .left{
-      display:flex;align-items:center;gap:12px;min-width:0;
-    }
-    .team{
-      display:flex;align-items:center;gap:8px;min-width:0;
-    }
-    .logo{
-      width:42px;height:42px;border-radius:8px;overflow:hidden;background:#222;
-      display:flex;align-items:center;justify-content:center;
-    }
-    .logo img{width:100%;height:100%;object-fit:cover}
-
-    .team-name{
-      font-weight:600;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width:120px;
+    .container {
+        max-width: 900px;
+        margin: auto;
+        padding: 20px;
     }
 
-    .score{
-      font-size:26px;
-      font-weight:700;
-      padding:0 10px;
-      color:#ff8a00;
-      letter-spacing:2px;
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
     }
 
-    .status{
-      display:flex;flex-direction:column;align-items:flex-end;gap:8px;
-      min-width:120px;
-    }
-    .badge{
-      padding:6px 12px;border-radius:20px;font-weight:700;font-size:12px;color:white;
-    }
-    .live{background:#18b243}
-    .soon{background:#ff8a00;color:#111}
-
-    .watch-btn{
-      background:var(--accent);
-      color:#fff;
-      border:none;
-      border-radius:8px;
-      padding:8px 14px;
-      font-weight:700;
-      cursor:pointer;
+    .match-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
     }
 
-    .meta{font-size:13px;color:var(--muted)}
-  </style>
+    .teams {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .team {
+        text-align: center;
+        flex: 1;
+    }
+
+    .vs {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .time {
+        font-size: 14px;
+        color: #555;
+        text-align: right;
+        min-width: 70px;
+    }
+
+    .watch-btn {
+        padding: 8px 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .watch-btn:hover {
+        background: #0056b3;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+        .match-card {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .time {
+            text-align: center;
+        }
+    }
+</style>
+
 </head>
 <body>
-  <div class="container">
-    <h1>Live Events — Jadwal</h1>
-    <div id="msg" class="meta">Memuat data…</div>
-    <div class="list" id="matchList"></div>
-  </div>
 
-  <script>
-    const MATCHES_JSON = 'matches.json';
-    const STREAMS_JSON = 'streams.json';
-    const IMAGES_PATH = 'images/';
+<div class="container">
+    <h2>Live Football Matches</h2>
 
-    const $msg = document.getElementById('msg');
-    const $list = document.getElementById('matchList');
+    <div id="matches"></div>
+</div>
 
-    async function loadData(){
-      try {
-        const [mRes, sRes] = await Promise.all([
-          fetch(MATCHES_JSON),
-          fetch(STREAMS_JSON)
-        ]);
-        const matches = await mRes.json();
-        const streams = await sRes.json();
-        render(matches, streams);
-      } catch(err){
-        $msg.textContent = 'Gagal memuat data.';
-      }
-    }
+<script>
+    // Contoh data — nanti bisa diganti JSON eksternal
+    const matchData = [
+        {
+            team1: "Manchester United",
+            team2: "Chelsea",
+            time: "22:00",
+            link: "https://example.com/match1"
+        },
+        {
+            team1: "Barcelona",
+            team2: "Real Madrid",
+            time: "00:30",
+            link: "https://example.com/match2"
+        }
+    ];
 
-    function render(matches, streams){
-      $msg.style.display = 'none';
-      $list.innerHTML = '';
-      matches.forEach(match => {
-        const card = document.createElement('div');
-        card.className = 'card';
+    const matchContainer = document.getElementById("matches");
 
-        card.addEventListener('click', ()=>{
-          const sid = match.streamId;
-          const url = streams[sid]?.url || match.streamUrl;
-          if(url) window.open(url, '_blank');
-          else alert('Tidak ada link streaming.');
-        });
+    matchData.forEach(match => {
+        const card = document.createElement("div");
+        card.className = "match-card";
 
-        const left = document.createElement('div'); 
-        left.className = 'left';
+        card.innerHTML = `
+            <div class="teams">
+                <div class="team">${match.team1}</div>
+                <div class="vs">VS</div>
+                <div class="team">${match.team2}</div>
+            </div>
+            <div class="time">${match.time}</div>
+            <a class="watch-btn" href="${match.link}" target="_blank">Visit</a>
+        `;
 
-        const teamA = makeTeamBlock(match.homeTeam, match.homeLogo);
-        const score = document.createElement('div'); 
-        score.className = 'score';
-        score.textContent = "VS";
-        const teamB = makeTeamBlock(match.awayTeam, match.awayLogo);
+        matchContainer.appendChild(card);
+    });
+</script>
 
-        left.appendChild(teamA);
-        left.appendChild(score);
-        left.appendChild(teamB);
-
-        const right = document.createElement('div');
-        right.className = 'status';
-
-        const badge = document.createElement('div');
-        badge.className = 'badge ' + (match.status === 'LIVE' ? 'live' : 'soon');
-        badge.textContent = match.status;
-
-        const time = document.createElement('div');
-        time.className = 'meta';
-        time.textContent = match.time || '';
-
-        const btn = document.createElement('button');
-        btn.className = 'watch-btn';
-        btn.textContent = "TONTON";
-
-        btn.addEventListener('click', (ev)=>{
-          ev.stopPropagation();
-          const sid = match.streamId;
-          const url = streams[sid]?.url || match.streamUrl;
-          if(url) window.open(url, '_blank');
-        });
-
-        right.appendChild(badge);
-        right.appendChild(time);
-        right.appendChild(btn);
-
-        card.appendChild(left);
-        card.appendChild(right);
-
-        $list.appendChild(card);
-      });
-    }
-
-    function makeTeamBlock(name, logo){
-      const wrap = document.createElement('div'); 
-      wrap.className = 'team';
-
-      const logoBox = document.createElement('div');
-      logoBox.className = 'logo';
-
-      const img = document.createElement('img');
-      img.src = IMAGES_PATH + logo;
-      logoBox.appendChild(img);
-
-      const nameEl = document.createElement('div');
-      nameEl.className = 'team-name';
-      nameEl.textContent = name;
-
-      wrap.appendChild(logoBox);
-      wrap.appendChild(nameEl);
-
-      return wrap;
-    }
-
-    loadData();
-  </script>
 </body>
 </html>
